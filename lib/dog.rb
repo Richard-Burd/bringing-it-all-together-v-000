@@ -31,6 +31,7 @@ class Dog
 
   def save
     # This method requires the <<self.update>> in order to work.
+    
   end
 
   def self.create # this only creates the Ruby object, not the database entry
