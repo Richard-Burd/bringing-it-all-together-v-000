@@ -1,5 +1,3 @@
-
-
 class Dog
   attr_accessor :id, :name, :breed
 
@@ -31,7 +29,7 @@ class Dog
 
   def save
     # This method requires the <<self.update>> in order to work.
-    
+
   end
 
   def self.create # this only creates the Ruby object, not the database entry
@@ -42,15 +40,15 @@ class Dog
     # This method requires the <<self.create>> method
   end
 
-  def self.new_from_db(row) 
+  def self.new_from_db(row)
 
-  end 
+  end
 
   def self.find_by_name(name)
 
-  end 
+  end
 
-  def self.find_by_id(id) 
+  def self.find_by_id(id)
 
-  end 
+  end
 end
