@@ -1,41 +1,34 @@
+require 'pry'
+require_relative "../config/environment.rb"
+
 class Dog
-  attr_accessor :id, :name, :breed
+
+  attr_accessor :name, :breed, :id
 
   def initialize(id: nil, name:, breed:)
-    self.id = id
-    self.name = name
-    self.breed = breed
+    # binding.pry
+    @id = id
+    @name = name
+    @breed = breed
   end
 
   def self.create_table
-    table_creating_sql = <<-SQL
+    sql =  <<-SQL
       CREATE TABLE IF NOT EXISTS dogs (
         id INTEGER PRIMARY KEY,
         name TEXT,
         breed TEXT
-      )
+        )
     SQL
-
-    DB[:conn].execute(table_creating_sql)
+    DB[:conn].execute(sql)
   end
 
   def self.drop_table
-    table_destroying_sql = <<-SQL
-      DROP TABLE IF EXISTS dogs
-    SQL
-
-    DB[:conn].execute(table_destroying_sql)
-  end
-
-  def update
-    sql_update = <<-SQL
-      UPDATE dogs SET name = ?, breed = ? WHERE id = ?
-    SQL
-    DB[:conn].execute(sql_update, self.name, self.breed, self.id)
+    sql = "DROP TABLE IF EXISTS dogs"
+    DB[:conn].execute(sql)
   end
 
   def save
-    # This method requires the <<self.update>> in order to work.
     if self.id
       self.update
     else
@@ -49,20 +42,27 @@ class Dog
     self
   end
 
-  def self.create # this only creates the Ruby object, not the database entry
+  def self.create(name:, breed:)
     dog = Dog.new(name: name, breed: breed)
     dog.save
     dog
   end
 
-  def self.find_or_create_by
-    # This method requires the <<self.create>> method
+ def self.find_or_create_by(name:, breed:)
+    dog = DB[:conn].execute("SELECT * FROM dogs WHERE name = '#{name}' AND breed = '#{breed}'")
+    if !dog.empty?
+      dog_data = dog[0]
+      dog = Dog.new(id: dog_data[0], name: dog_data[1], breed: dog_data[2])
+    else
+      dog = self.create(name: name, breed: breed)
+    end
+    dog
   end
 
   def self.new_from_db(row)
     id = row[0]
     name = row[1]
-    breed = breed[2]
+    breed = row[2]
     self.new(id: id, name: name, breed: breed)
   end
 
@@ -80,12 +80,21 @@ class Dog
   end
 
   def self.find_by_id(id)
-    sql_finder = <<-SQL
-      SELECT * FROM dogs WHERE id = ? LIMIT 1
+    sql = <<-SQL
+      SELECT *
+      FROM dogs
+      WHERE id = ?
+      LIMIT 1
     SQL
 
-    DB[:conn].execute(sql_finder, id).map do |series|
-      self.new_from_db(series)
+    DB[:conn].execute(sql,id).map do |row|
+      self.new_from_db(row)
     end.first
   end
+
+  def update
+    sql = "UPDATE dogs SET name = ?, breed = ?  WHERE id = ?"
+    DB[:conn].execute(sql, self.name, self.breed, self.id)
+  end
+
 end
