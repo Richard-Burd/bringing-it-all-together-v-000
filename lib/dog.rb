@@ -27,6 +27,10 @@ class Dog
     DB[:conn].execute(table_destroying_sql)
   end
 
+  def update
+
+  end
+
   def save
     # This method requires the <<self.update>> in order to work.
 
@@ -51,8 +55,4 @@ class Dog
   def self.find_by_id(id)
 
   end
-
-  def update
-
-  end 
 end
